@@ -40,7 +40,7 @@
                 System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
 
 
-
+                //Reset All table values
 
                 for (i = 0; i < 256; i++)
                 {
@@ -59,7 +59,7 @@
                 bmaxoff = 0;
                
                 
-
+                //RGB Statics most used rgb values detection
                 p = bp-1;
                 for (x = 0; x < image1.Width; x++)
                 {
@@ -74,7 +74,7 @@
                 }
                 
                 
-              
+              //Optimize RGB Codes and regenerate RGB table
                 for (j = 0; j < 256; j += q)
                 {
                     for (i = 0; i < q; i++)
@@ -109,7 +109,7 @@
                     bmax = 0;
                 }
                
-                
+                //Finally Optimize RGB Values from renc,genc,benc table
                 p = bp-1;
                 for (x = 0; x < image1.Width; x++)
                 {
@@ -121,7 +121,6 @@
                         p += bp;
                     }
                 }
-                // Set the PictureBox to display the image.
                 System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);
 
                 // Unlock the bits.
