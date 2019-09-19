@@ -1,0 +1,140 @@
+ private void ImageOptimize(String filename,int q=4,long Quality=70)
+        {
+            
+          
+                image1 = new Bitmap(filename);
+                fienc = new FileInfo(filename);
+                int x, y;
+                uint p = 0,bp=3;
+
+
+                // Lock the bitmap's bits.  
+                Rectangle rect = new Rectangle(0, 0, image1.Width, image1.Height);
+                System.Drawing.Imaging.BitmapData bmpData =
+                    image1.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite,
+                    image1.PixelFormat);
+                switch (image1.PixelFormat.ToString() )
+                {
+                         case "Format24bppRgb":
+                         bp=3;
+                         break;
+                         case "Format32bppArgb":
+                         bp = 4;
+                         break;
+                    case "Format32bppRgb":
+                         bp = 4;
+                         break;
+                    default:
+                         bp = 3;
+                         break;
+                  }
+
+                // Get the address of the first line.
+                IntPtr ptr = bmpData.Scan0;
+
+                // Declare an array to hold the bytes of the bitmap.
+                int bytes = Math.Abs(bmpData.Stride) * image1.Height;
+                byte[] rgbValues = new byte[bytes];
+
+                // Copy the RGB values into the array.
+                System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
+
+
+
+
+                for (i = 0; i < 256; i++)
+                {
+                    r1[i] = 0;
+                    g1[i] = 0;
+                    b1[i] = 0;
+                    renc[i] = 0;
+                    genc[i] = 0;
+                    benc[i] = 0;
+                }
+                rmax = 0;
+                gmax = 0;
+                bmax = 0;
+                rmaxoff = 0;
+                gmaxoff = 0;
+                bmaxoff = 0;
+               
+                
+
+                p = bp-1;
+                for (x = 0; x < image1.Width; x++)
+                {
+                    for (y = 0; y < image1.Height; y++)
+                    {
+
+                        r1[rgbValues[p]] += 1;
+                        g1[rgbValues[p - 1]] += 1;
+                        b1[rgbValues[p - 2]] += 1;
+                        p += bp;
+                    }
+                }
+                
+                
+              
+                for (j = 0; j < 256; j += q)
+                {
+                    for (i = 0; i < q; i++)
+                    {
+                        if (r1[i + j] > rmax)
+                        {
+                            rmax = r1[i + j];
+                            rmaxoff = i + j;
+                        }
+                        if (g1[i + j] > gmax)
+                        {
+                            gmax = g1[i + j];
+                            gmaxoff = i + j;
+                        }
+                        if (b1[i + j] > bmax)
+                        {
+                            bmax = b1[i + j];
+                            bmaxoff = i + j;
+                        }
+                    }
+                    for (i = 0; i < q; i++)
+                    {
+                        renc[i + j] = rmaxoff;
+                        genc[i + j] = gmaxoff;
+                        benc[i + j] = bmaxoff;
+                    }
+                    rmaxoff = 0;
+                    gmaxoff = 0;
+                    bmaxoff = 0;
+                    rmax = 0;
+                    gmax = 0;
+                    bmax = 0;
+                }
+               
+                
+                p = bp-1;
+                for (x = 0; x < image1.Width; x++)
+                {
+                    for (y = 0; y < image1.Height; y++)
+                    {
+                        rgbValues[p] = Convert.ToByte(renc[rgbValues[p]]);
+                        rgbValues[p - 1] = Convert.ToByte(genc[rgbValues[p - 1]]);
+                        rgbValues[p - 2] = Convert.ToByte(benc[rgbValues[p - 2]]);
+                        p += bp;
+                    }
+                }
+                // Set the PictureBox to display the image.
+                System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);
+
+                // Unlock the bits.
+                image1.UnlockBits(bmpData);
+               
+                
+                
+                ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
+                System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
+                EncoderParameters myEncoderParameters = new EncoderParameters(1);
+                EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, Quality);
+
+                myEncoderParameters.Param[0] = myEncoderParameter;
+                image1.Save(fienc.Directory.FullName + @"\Optimize\" + fienc.Name.Replace(".jpg","(opt).jpg")  , jpgEncoder, myEncoderParameters);
+          
+        }
